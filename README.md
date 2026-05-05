@@ -1,1 +1,3 @@
 # auto-youtube-
+create a work flow for ai agent who everyday searches for google trends and youtube trends by using login id rohit123yadav@gmail.com, and by using rohityadv@atomicmail.io login and password writes a script with help of chat GPT makes voice over from eleven labs ai and the makes images with help of bing and canva , and finds copyright free images with help of pixels kpi and then makes a video with help of all these tools and then takes help of API V3 creates title, description and thumbnail to publish a video on youtube channel 
+<img width="65" height="21" alt="image" src="https://github.com/user-attachments/assets/886e59e0-29f1-4d7d-aa75-8281d2cfe175" />
