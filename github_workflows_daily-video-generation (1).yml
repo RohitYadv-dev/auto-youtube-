@@ -1,0 +1,76 @@
+name=.github/workflows/daily-video-generation.yml
+```yaml
+name: Daily AI YouTube Video Generation
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Runs daily at 8:00 AM UTC
+  workflow_dispatch:
+
+jobs:
+  generate-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r config/requirements.txt
+      
+      - name: Step 1 - Fetch Google & YouTube Trends
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python src/trends/trend_analyzer.py
+      
+      - name: Step 2 - Generate Video Script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python src/content/script_generator.py
+      
+      - name: Step 3 - Generate Voiceover
+        env:
+          ELEVEN_LABS_API_KEY: ${{ secrets.ELEVEN_LABS_API_KEY }}
+        run: python src/content/voiceover_generator.py
+      
+      - name: Step 4 - Generate Images
+        env:
+          BING_SEARCH_API_KEY: ${{ secrets.BING_SEARCH_API_KEY }}
+          CANVA_API_KEY: ${{ secrets.CANVA_API_KEY }}
+        run: python src/media/image_generator.py
+      
+      - name: Step 5 - Download Stock Images
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: python src/media/image_downloader.py
+      
+      - name: Step 6 - Compile Video
+        run: python src/video/video_compiler.py
+      
+      - name: Step 7 - Generate Metadata
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python src/youtube/metadata_generator.py
+      
+      - name: Step 8 - Publish to YouTube
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python src/youtube/youtube_publisher.py
+      
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: workflow-logs
+          path: logs/
